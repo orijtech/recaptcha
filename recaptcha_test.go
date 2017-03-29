@@ -121,13 +121,12 @@ func (cb *customBackend) RoundTrip(req *http.Request) (*http.Response, error) {
 		return res, nil
 	}
 
-	queryValues := req.URL.Query()
 	var errsList []string
-	secretKey := queryValues.Get("secret")
+	secretKey := req.PostFormValue("secret")
 	if secretKey == "" {
 		errsList = append(errsList, "missing-input-secret")
 	}
-	response := queryValues.Get("response")
+	response := req.PostFormValue("response")
 	if response == "" {
 		errsList = append(errsList, "missing-input-response")
 	}

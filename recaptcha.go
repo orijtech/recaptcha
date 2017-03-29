@@ -3,7 +3,6 @@ package recaptcha
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -82,19 +81,13 @@ func (req *Request) Verify() (*Response, error) {
 	asMap := make(map[string]string)
 	_ = json.Unmarshal(blob, &asMap)
 
-	hdr := make(url.Values)
+	values := make(url.Values)
 	for key, value := range asMap {
-		hdr.Add(key, value)
+		values.Add(key, value)
 	}
-	finalURL := fmt.Sprintf("%s?%s", verifyURL, hdr.Encode())
 
-	// As of Go1.8, using http.NoBody instead of nil, http.Transport
-	// doesn't recognize http.NoBody.
-	// See https://github.com/golang/go/issues/18891
-	// TODO: Use http.NoBody once that bug is fixed.
-	httpReq, _ := http.NewRequest("POST", finalURL, nil)
 	httpClient := req.httpClient()
-	httpRes, err := httpClient.Do(httpReq)
+	httpRes, err := httpClient.PostForm(verifyURL, values)
 	if err != nil {
 		return nil, err
 	}
